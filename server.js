@@ -1,4 +1,4 @@
-// server.js - Signed QR Verification (Option A)
+// index.js - Signed QR Verification (Option A)
 // npm i express
 // SECRET="your-long-random-secret" node server.js
 const express = require("express");
