@@ -83,4 +83,7 @@ app.get("/v", (req, res) => {
 const PORT = process.env.PORT || 1000;
 app.listen(PORT, () => console.log("Running on port", PORT));
 
+app.get("/", (req, res) => {
+  res.send("AJ Verification is running");
+
 
