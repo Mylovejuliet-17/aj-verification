@@ -13,3 +13,6 @@
     "express": "^4.19.2"
   }
 }
+"dependencies":{
+  "express":"^4.19.2",
+  "mongoose":"^8.0.0"
