@@ -80,7 +80,7 @@ app.get("/v", (req, res) => {
   </div></div></body></html>`);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 1000;
 app.listen(PORT, () => console.log("Running on port", PORT));
 
 
