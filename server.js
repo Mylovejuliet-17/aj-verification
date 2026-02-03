@@ -8,6 +8,16 @@ const QRCode = require("qrcode");
 const PDFDocument = require("pdfkit");
 
 const db = require("./db");
+// --- TEMP seed employee (so /verify works) ---
+db.employees.push({
+  employee_id: "AJAGLCEO20226001",
+  full_name: "Abraham Agyeman Badu",
+  position: "CEO / Driver",
+  department: "CEO",
+  company: "AJ Alpha Global Logistics LLC",
+  status: "Active"
+});
+
 // const webhook = require('./services/webhook');
 
 
@@ -86,25 +96,25 @@ app.get("/api/employees/:id", async (req, res) => {
 });
 
 app.post("/api/employees", async (req, res) => {
-  employees.push({
+  
   employee_id: "AJAGLCEO20226001",
   full_name: "Abraham Agyeman Badu",
   position: "CEO / Driver",
   department: "CEO",
   company: "AJ Alpha Global Logistics LLC",
   status: "Active"
-});
+
 
   const p = req.body || {};
   const employee_id = normalizeEmployeeId(p.employee_id);
-employees.push({
+
   employee_id: "AJAGLCEO20226001",
   full_name: "Abraham Agyeman Badu",
   position: "CEO / Driver",
   department: "CEO",
   company: "AJ Alpha Global Logistics LLC",
   status: "Active"
-});
+
 
   if (!employee_id || !p.full_name) return res.status(400).json({ error: "employee_id and full_name are required" });
 
