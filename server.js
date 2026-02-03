@@ -95,22 +95,10 @@ app.post("/api/employees", async (req, res) => {
 
   
 
-
-  if (!employee_id || !p.full_name) {
-    return res.status(400).json({
-      error: "employee_id and full_name are required"
-    });
-  }
-
  
     
 
-  res.status(201).json({
-    employee_id,
-    verify_url: verifyUrlFor(employee_id)
-  });
-
-app.get("/api/employees/:id", async (req, res) => {
+  
   try {
     const id = normalizeEmployeeId(req.params.id);
 
