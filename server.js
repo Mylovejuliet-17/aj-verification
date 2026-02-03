@@ -1,3 +1,6 @@
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
 
 // --- TEMP seed employee (so /verify works) ---
 
