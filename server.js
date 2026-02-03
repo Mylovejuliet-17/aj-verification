@@ -106,7 +106,7 @@ app.post("/api/employees", async (req, res) => {
     employee_id,
     verify_url: verifyUrlFor(employee_id)
   });
-});
+
 app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
