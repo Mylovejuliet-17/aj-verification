@@ -9,14 +9,7 @@ const PDFDocument = require("pdfkit");
 
 const db = require("./db");
 // --- TEMP seed employee (so /verify works) ---
-db.employees.push({
-  employee_id: "AJAGLCEO20226001",
-  full_name: "Abraham Agyeman Badu",
-  position: "CEO / Driver",
-  department: "CEO",
-  company: "AJ Alpha Global Logistics LLC",
-  status: "Active"
-});
+
 
 
 // const webhook = require('./services/webhook');
