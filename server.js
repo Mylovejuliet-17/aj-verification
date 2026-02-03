@@ -77,7 +77,45 @@ app.get("/api/employees", async (req, res) => {
   const rows = await dbAll("SELECT * FROM employees ORDER BY employee_id ASC");
   res.json(rows.map(r => ({ ...r, verify_url: verifyUrlFor(r.employee_id) })));
 });
+// CREATE EMPLOYEE
+app.post("/api/employees", async (req, res) => {
+  const p = req.body || {};
+  const employee_id = normalizeEmployeeId(p.employee_id);
 
+  if (!employee_id || !p.full_name) {
+    return res.status(400).json({
+      error: "employee_id and full_name are required"
+    });
+  }
+
+  await dbRun(
+    `
+    INSERT INTO employees (
+      employee_id,
+      full_name,
+      job_title,
+      department,
+      employment_type,
+      status,
+      created_at,
+      updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    `,
+    [
+      employee_id,
+      p.full_name,
+      p.job_title || "",
+      p.department || "",
+      p.employment_type || "",
+      p.status || "Active"
+    ]
+  );
+
+  res.status(201).json({
+    employee_id,
+    verify_url: verifyUrlFor(employee_id)
+  });
+});
 app.get("/api/employees/:id", async (req, res) => {
   const id = normalizeEmployeeId(req.params.id);
   const e = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
