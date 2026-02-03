@@ -1,13 +1,4 @@
-require("dotenv").config();
 
-const express = require("express");
-const helmet = require("helmet");
-const cors = require("cors");
-const morgan = require("morgan");
-const QRCode = require("qrcode");
-const PDFDocument = require("pdfkit");
-
-const db = require("./db");
 // --- TEMP seed employee (so /verify works) ---
 
 
@@ -90,21 +81,17 @@ app.post("/api/employees", async (req, res) => {
       employee_id: employee.employee_id,
       verify_url: verifyUrlFor(employee.employee_id),
       employee
-    });
-  } catch (err) {
+      } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create employee" });
   }
 });
-  const rows = await dbAll("SELECT * FROM employees ORDER BY employee_id ASC");
-  res.json(rows.map(r => ({ ...r, verify_url: verifyUrlFor(r.employee_id) })));
-});
-// CREATE EMPLOYEE
+
+  
 app.post("/api/employees", async (req, res) => {
   try {
     const data = req.body;
 
-    // AUTO-GENERATE ID
     if (!data.employee_id) {
       data.employee_id = await generateEmployeeId(
         data.position || data.department || ""
