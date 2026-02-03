@@ -78,34 +78,19 @@ app.post("/api/employees", async (req, res) => {
     const employee = await Employee.create(data);
 
     res.status(201).json({
-      employee_id: employee.employee_id,
-      verify_url: verifyUrlFor(employee.employee_id),
-      employee
-      } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create employee" });
-  }
+  employee_id: employee.employee_id,
+  verify_url: verifyUrlFor(employee.employee_id),
+  employee
 });
+
+} catch (err) {
+  console.error(err);
+  res.status(500).json({ error: "Failed to create employee" });
+}
+});
+
 
   
-app.post("/api/employees", async (req, res) => {
-  try {
-    const data = req.body;
-
-    if (!data.employee_id) {
-      data.employee_id = await generateEmployeeId(
-        data.position || data.department || ""
-      );
-    }
-
-    const employee = await Employee.create(data);
-    res.status(201).json(employee);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create employee" });
-  }
-});
 
 
   if (!employee_id || !p.full_name) {
