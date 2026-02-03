@@ -87,12 +87,14 @@ app.get("/api/employees/:id", async (req, res) => {
 
 app.post("/api/employees", async (req, res) => {
   employees.push({
-  employee_id: "AJ-EMP-001",
+  employee_id: "AJAGLCEO20226001",
   full_name: "Abraham Agyeman Badu",
-  department: "CEO / Driver",
+  position: "CEO / Driver",
+  department: "CEO",
   company: "AJ Alpha Global Logistics LLC",
   status: "Active"
 });
+
   const p = req.body || {};
   const employee_id = normalizeEmployeeId(p.employee_id);
 employees.push({
