@@ -105,28 +105,8 @@ app.post("/api/employees", async (req, res) => {
     });
   }
 
-  await dbRun(
-    `
-    INSERT INTO employees (
-      employee_id,
-      full_name,
-      job_title,
-      department,
-      employment_type,
-      status,
-      created_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-    `,
-    [
-      employee_id,
-      p.full_name,
-      p.job_title || "",
-      p.department || "",
-      p.employment_type || "",
-      p.status || "Active"
-    ]
-  );
+ 
+    
 
   res.status(201).json({
     employee_id,
@@ -134,19 +114,48 @@ app.post("/api/employees", async (req, res) => {
   });
 });
 app.get("/api/employees/:id", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const e = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!e) return res.status(404).json({ error: "Not found" });
+  try {
+    const id = normalizeEmployeeId(req.params.id);
 
-  const d = await dbGet("SELECT * FROM drivers WHERE employee_id = ?", [id]);
-  const docs = await dbGet("SELECT * FROM documents WHERE employee_id = ?", [id]);
-return res.json({
-  employee: e,
-  driver: d,
-  documents: docs
-});
+    const employee = await Employee.findOne({ employee_id: id }).lean();
+    if (!employee) return res.status(404).json({ error: "Not found" });
+
+    // If you don't have Driver/Document models yet, return only employee
+    return res.json({ employee });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to fetch employee" });
+  }
 });
 
+
+app.put("/api/employees/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
+    const p = req.body || {};
+
+    const updated = await Employee.findOneAndUpdate(
+      { employee_id: id },
+      {
+        $set: {
+          full_name: p.full_name,
+          position: p.job_title || p.position,
+          department: p.department,
+          employment_type: p.employment_type,
+          status: p.status,
+          company: p.company
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to update employee" });
+  }
+});
 app.put("/api/employees/:id", async (req, res) => {
   const id = normalizeEmployeeId(req.params.id);
   const p = req.body || {};
