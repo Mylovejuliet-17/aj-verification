@@ -15,3 +15,23 @@ const CounterSchema = new mongoose.Schema({
 
 module.exports = mongoose.model("Counter", CounterSchema);
 
+models/Employee.js
+const mongoose = require("mongoose");
+
+const EmployeeSchema = new mongoose.Schema({
+  employee_id: {
+    type: String,
+    unique: true
+  },
+  full_name: String,
+  position: String,
+  department: String,
+  company: String,
+  status: String,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+module.exports = mongoose.model("Employee", EmployeeSchema);
