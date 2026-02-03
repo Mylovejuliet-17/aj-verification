@@ -8,13 +8,15 @@ const QRCode = require("qrcode");
 const PDFDocument = require("pdfkit");
 
 const db = require("./db");
-const { sendWebhookIfConfigured } = require("./services/webhook");
+// const webhook = require('./services/webhook');
+
 
 const app = express();
 app.use(helmet({ contentSecurityPolicy: false })); // allow inline admin UI for simplicity
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
-app.use(morgan("dev"));
+// app.use('/webhook', webhook);
+
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
