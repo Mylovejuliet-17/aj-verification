@@ -95,7 +95,13 @@ app.post("/api/employees", async (req, res) => {
 });
   const p = req.body || {};
   const employee_id = normalizeEmployeeId(p.employee_id);
-
+employees.push({
+  employee_id: "AJ-EMP-001",
+  full_name: "Abraham Agyeman Badu",
+  department: "CEO / Driver",
+  company: "AJ Alpha Global Logistics LLC",
+  status: "Active"
+});
   if (!employee_id || !p.full_name) return res.status(400).json({ error: "employee_id and full_name are required" });
 
   const status = p.status || "Active";
