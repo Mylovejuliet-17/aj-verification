@@ -98,8 +98,6 @@ app.post("/api/employees", async (req, res) => {
   }
 });
 
-  const p = req.body || {};
-  const employee_id = normalizeEmployeeId(p.employee_id);
 
   if (!employee_id || !p.full_name) {
     return res.status(400).json({
