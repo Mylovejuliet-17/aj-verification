@@ -92,52 +92,11 @@ app.get("/api/employees/:id", async (req, res) => {
 
   const d = await dbGet("SELECT * FROM drivers WHERE employee_id = ?", [id]);
   const docs = await dbGet("SELECT * FROM documents WHERE employee_id = ?", [id]);
-
-  res.json({ employee: { ...e, verify_url: verifyUrlFor(id) }, driver: d || null, documents: docs || null });
+return res.json({
+  employee: e,
+  driver: d,
+  documents: docs
 });
-
-app.post("/api/employees", async (req, res) => {
-  
-  employee_id: "AJAGLCEO20226001",
-  full_name: "Abraham Agyeman Badu",
-  position: "CEO / Driver",
-  department: "CEO",
-  company: "AJ Alpha Global Logistics LLC",
-  status: "Active"
-
-
-  const p = req.body || {};
-  const employee_id = normalizeEmployeeId(p.employee_id);
-
-  employee_id: "AJAGLCEO20226001",
-  full_name: "Abraham Agyeman Badu",
-  position: "CEO / Driver",
-  department: "CEO",
-  company: "AJ Alpha Global Logistics LLC",
-  status: "Active"
-
-
-  if (!employee_id || !p.full_name) return res.status(400).json({ error: "employee_id and full_name are required" });
-
-  const status = p.status || "Active";
-
-  await dbRun(`
-    INSERT INTO employees (
-      employee_id, full_name, job_title, department, employment_type, hire_date, status,
-      phone, email, home_address, dob, emergency_contact_name, emergency_contact_phone, notes,
-      created_at, updated_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),datetime('now'))
-  `, [
-    employee_id, p.full_name, p.job_title || "", p.department || "", p.employment_type || "", p.hire_date || "", status,
-    p.phone || "", p.email || "", p.home_address || "", p.dob || "", p.emergency_contact_name || "", p.emergency_contact_phone || "", p.notes || ""
-  ]);
-
-  const created = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [employee_id]);
-
-  // optional webhook
-  sendWebhookIfConfigured({ event: "employee.created", employee: created }, process.env);
-
-  res.status(201).json({ ...created, verify_url: verifyUrlFor(employee_id) });
 });
 
 app.put("/api/employees/:id", async (req, res) => {
