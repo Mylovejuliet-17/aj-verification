@@ -73,7 +73,29 @@ function safePublicEmployeeView(e) {
 // ---- API ----
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-app.get("/api/employees", async (req, res) => {
+app.post("/api/employees", async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Auto-generate ID if not provided
+    if (!data.employee_id) {
+      data.employee_id = await generateEmployeeId(
+        data.position || data.department || "EMP"
+      );
+    }
+
+    const employee = await Employee.create(data);
+
+    res.status(201).json({
+      employee_id: employee.employee_id,
+      verify_url: verifyUrlFor(employee.employee_id),
+      employee
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create employee" });
+  }
+});
   const rows = await dbAll("SELECT * FROM employees ORDER BY employee_id ASC");
   res.json(rows.map(r => ({ ...r, verify_url: verifyUrlFor(r.employee_id) })));
 });
