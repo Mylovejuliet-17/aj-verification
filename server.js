@@ -103,20 +103,32 @@ app.post("/api/employees", async (req, res) => {
     const id = normalizeEmployeeId(req.params.id);
 
     const employee = await Employee.findOne({ employee_id: id }).lean();
-    if (!employee) return res.status(404).json({ error: "Not found" });
+    app.get("/api/employees/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
 
-    // If you don't have Driver/Document models yet, return only employee
-    return res.json({ employee });
+    const rows = await dbAll(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+    const employee = rows[0];
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    return res.json({
+      employee: {
+        ...employee,
+        verify_url: verifyUrlFor(employee.employee_id)
+      }
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
 
-
-app.put("/api/employees/:id", async (req, res) => {
-  try {
-    const id = normalizeEmployeeId(req.params.id);
     const p = req.body || {};
 
     const updated = await Employee.findOneAndUpdate(
@@ -132,7 +144,7 @@ app.put("/api/employees/:id", async (req, res) => {
         }
       },
       { new: true }
-    );
+  
 
     if (!updated) return res.status(404).json({ error: "Not found" });
     return res.json(updated);
