@@ -79,6 +79,25 @@ app.get("/api/employees", async (req, res) => {
 });
 // CREATE EMPLOYEE
 app.post("/api/employees", async (req, res) => {
+  try {
+    const data = req.body;
+
+    // AUTO-GENERATE ID
+    if (!data.employee_id) {
+      data.employee_id = await generateEmployeeId(
+        data.position || data.department || ""
+      );
+    }
+
+    const employee = await Employee.create(data);
+    res.status(201).json(employee);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create employee" });
+  }
+});
+
   const p = req.body || {};
   const employee_id = normalizeEmployeeId(p.employee_id);
 
