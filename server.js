@@ -257,3 +257,16 @@ app.get("/api/employees/:id", async (req, res) => {
   }
 });
 
+// Fallback
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    error: "Server error",
+    detail: String((err && err.message) || err),
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Employee registry server running on http://localhost:${PORT}`);
+  console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
+});
