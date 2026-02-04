@@ -258,11 +258,7 @@ app.get("/api/employees/:id", async (req, res) => {
 });
 
 
-
-
-
-
-   
+    
 
     // 👉 UPDATE employee by ID (SQLite)
 app.put("/api/employees/:id", async (req, res) => {
@@ -275,12 +271,21 @@ app.put("/api/employees/:id", async (req, res) => {
     const sets = [];
     const vals = [];
 
-    for (const key of allowed) {
-      if (p[key] !== undefined) {
-        sets.push(`${key} = ?`);
-        vals.push(p[key]);
-      }
-    }
+    
+
+
+
+for (const key of allowed) {
+  if (p[key] !== undefined) {
+    sets.push(`${key} = ?`);
+    vals.push(p[key]);
+  }
+}
+
+
+
+
+
 
     if (sets.length === 0) {
       return res.status(400).json({ error: "No valid fields to update" });
