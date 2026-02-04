@@ -257,62 +257,134 @@ app.get("/api/employees/:id", async (req, res) => {
   }
 });
 
+// ID cards PDF (multiple on letter)
+app.get("/api/idcards.pdf", async (req, res) => {
+  try {
+    const idsParam = (req.query.ids || "").toString();
+    const ids = idsParam.split(",").map(normalizeEmployeeId).filter(Boolean);
 
-  if (ids.length === 0) return res.status(400).send("Provide ids query param, e.g. ?ids=AJ-EMP-001,AJ-EMP-002");
-
-  const employees = await dbAll(`SELECT * FROM employees WHERE employee_id IN (${ids.map(() => "?").join(",")}) ORDER BY employee_id`, ids);
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "inline; filename=\"idcards.pdf\"");
-
-  const doc = new PDFDocument({ size: "LETTER", margin: 36 });
-  doc.pipe(res);
-
-  doc.fillColor("#1F4E79").font("Helvetica-Bold").fontSize(14).text("Employee ID Cards", { align: "left" });
-  doc.moveDown(0.5);
-
-  const cardW = 241, cardH = 151, gapX = 18, gapY = 18;
-  const startX = doc.page.margins.left;
-  let x = startX, y = doc.y + 10;
-  let col = 0, row = 0;
-
-  for (const e of employees) {
-    // new page if needed
-    if (y + cardH > doc.page.height - doc.page.margins.bottom) {
-      doc.addPage();
-      doc.fillColor("#1F4E79").font("Helvetica-Bold").fontSize(14).text("Employee ID Cards", { align: "left" });
-      doc.moveDown(0.5);
-      x = startX; y = doc.y + 10; col = 0; row = 0;
+    if (ids.length === 0) {
+      return res
+        .status(400)
+        .send("Provide ids query param, e.g. ?ids=AJ-EMP-001,AJ-EMP-002");
     }
 
-    // Card border
-    doc.save();
-    doc.lineWidth(2).strokeColor("#1F4E79").rect(x, y, cardW, cardH).stroke();
+    const employees = await dbAll(
+      `SELECT * FROM employees WHERE employee_id IN (${ids.map(() => "?").join(",")}) ORDER BY employee_id`,
+      ids
+    );
 
-    // Header bar
-    doc.rect(x, y, cardW, 34).fill("#1F4E79");
-    doc.fillColor("white").font("Helvetica-Bold").fontSize(10).text("A&J ALPHA GLOBAL LOGISTICS LLC", x+10, y+12, { width: cardW-20 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="idcards.pdf"');
 
-    // Text
-    doc.fillColor("#000000").font("Helvetica").fontSize(9);
-    doc.text(`Name: ${e.full_name}`, x+10, y+44);
-    doc.text(`Title: ${e.job_title || ""}`, x+10, y+62);
-    doc.text(`Employee ID: ${e.employee_id}`, x+10, y+80);
-    doc.text(`Status: ${e.status || ""}`, x+10, y+98);
+    const doc = new PDFDocument({ size: "LETTER", margin: 36 });
+    doc.pipe(res);
 
-    const url = verifyUrlFor(e.employee_id);
-    const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, scale: 6 });
-    const img = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-    
-      x = startX;
-      y += cardH + gapY;
-    } else {
-      x += cardW + gapX;
+    doc.fillColor("#1F4E79").font("Helvetica-Bold").fontSize(14).text("Employee ID Cards", { align: "left" });
+    doc.moveDown(0.5);
+
+    const cardW = 241, cardH = 151, gapX = 18, gapY = 18;
+    const startX = doc.page.margins.left;
+    let x = startX, y = doc.y + 10;
+    let col = 0, row = 0;
+
+    for (const e of employees) {
+      if (y + cardH > doc.page.height - doc.page.margins.bottom) {
+        doc.addPage();
+        doc.fillColor("#1F4E79").font("Helvetica-Bold").fontSize(14).text("Employee ID Cards", { align: "left" });
+        doc.moveDown(0.5);
+        x = startX; y = doc.y + 10; col = 0; row = 0;
+      }
+
+      // ID cards PDF (multiple on letter)
+app.get("/api/idcards.pdf", async (req, res) => {
+  try {
+    const idsParam = (req.query.ids || "").toString();
+    const ids = idsParam.split(",").map(normalizeEmployeeId).filter(Boolean);
+
+    if (ids.length === 0) {
+      return res
+        .status(400)
+        .send("Provide ids query param, e.g. ?ids=AJ-EMP-001,AJ-EMP-002");
     }
+
+    const employees = await dbAll(
+      `SELECT * FROM employees WHERE employee_id IN (${ids.map(() => "?").join(",")}) ORDER BY employee_id`,
+      ids
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="idcards.pdf"');
+
+    const doc = new PDFDocument({ size: "LETTER", margin: 36 });
+    doc.pipe(res);
+
+    doc.fillColor("#1F4E79")
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .text("Employee ID Cards", { align: "left" });
+
+    doc.moveDown(0.5);
+
+    const cardW = 241, cardH = 151, gapX = 18, gapY = 18;
+    const startX = doc.page.margins.left;
+    let x = startX, y = doc.y + 10;
+    let col = 0;
+
+    for (const e of employees) {
+      if (y + cardH > doc.page.height - doc.page.margins.bottom) {
+        doc.addPage();
+        doc.fillColor("#1F4E79")
+          .font("Helvetica-Bold")
+          .fontSize(14)
+          .text("Employee ID Cards", { align: "left" });
+        doc.moveDown(0.5);
+        x = startX;
+        y = doc.y + 10;
+        col = 0;
+      }
+
+      doc.lineWidth(2).strokeColor("#1F4E79").rect(x, y, cardW, cardH).stroke();
+      doc.rect(x, y, cardW, 34).fill("#1F4E79");
+
+      doc.fillColor("white")
+        .font("Helvetica-Bold")
+        .fontSize(10)
+        .text("AJ ALPHA GLOBAL LOGISTICS LLC", x + 10, y + 12);
+
+      doc.fillColor("#000000").font("Helvetica").fontSize(9);
+      doc.text(`Name: ${e.full_name || ""}`, x + 10, y + 44);
+      doc.text(`Title: ${e.job_title || ""}`, x + 10, y + 62);
+      doc.text(`Employee ID: ${e.employee_id || ""}`, x + 10, y + 80);
+      doc.text(`Status: ${e.status || ""}`, x + 10, y + 98);
+
+      const url = verifyUrlFor(e.employee_id);
+      const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, scale: 6 });
+      const img = qrDataUrl.replace(/^data:image\/png;base64,/, "");
+      const buf = Buffer.from(img, "base64");
+      doc.image(buf, x + cardW - 88, y + 46, { fit: [72, 72] });
+
+      doc.fillColor("#666666")
+        .fontSize(7)
+        .text("Scan to verify", x + 10, y + 126);
+
+      if (col === 0) {
+        col = 1;
+        x += cardW + gapX;
+      } else {
+        col = 0;
+        x = startX;
+        y += cardH + gapY;
+      }
+    }
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to generate idcards pdf");
   }
-
-  doc.end();
 });
+
 
 // ---- Public Verification Page ----
 // This page should show only minimal info (name/title/id/status).
