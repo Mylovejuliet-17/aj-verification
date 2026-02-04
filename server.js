@@ -260,49 +260,7 @@ app.get("/api/employees/:id", async (req, res) => {
 
     
 
-    // 👉 UPDATE employee by ID (SQLite)
-app.put("/api/employees/:id", async (req, res) => {
-  try {
-    const id = normalizeEmployeeId(req.params.id);
-    const p = req.body || {};
-
-    // Only allow updating these fields
-    const allowed = ["full_name", "department", "position", "company", "photo_url", "status"];
-    const sets = [];
-    const vals = [];
-
     
-
-
-
-for (const key of allowed) {
-  if (p[key] !== undefined) {
-    sets.push(`${key} = ?`);
-    vals.push(p[key]);
-  }
-}
-
-
-
-
-
-
-    if (sets.length === 0) {
-      return res.status(400).json({ error: "No valid fields to update" });
-    }
-
-    // Add updated time if you have this column (safe to remove if you don't)
-    // sets.push("updated_at = ?");
-   
-    
-    vals.push(id);
-
-await dbRun(
-  "UPDATE employees SET ${sets.join(', ')} WHERE employee_id = ?",
- 
-  const exists = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!exists) return res.status(404).json({ error: "Not found" });
-
   await dbRun("DELETE FROM employees WHERE employee_id = ?", [id]);
   sendWebhookIfConfigured({ event: "employee.deleted", employee: exists }, process.env);
 
