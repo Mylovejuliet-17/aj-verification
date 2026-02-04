@@ -232,8 +232,14 @@ app.get("/api/employees/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    app.get("/api/employees/:id", async (req, res) => {
+  try {
+    ...
+  } catch (err) {
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
+});
+
 
 
     const p = req.body || {};
