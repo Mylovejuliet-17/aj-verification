@@ -613,8 +613,5 @@ app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Failed to update employee" });
-  }
-});
+  
+
