@@ -293,73 +293,13 @@ for (const key of allowed) {
 
     // Add updated time if you have this column (safe to remove if you don't)
     // sets.push("updated_at = ?");
-    // vals.push(nowIso());
-
+   
+    
     vals.push(id);
 
-    await dbRun(
-      `UPDATE employees SET ${sets.join(", ")} WHERE employee_id = ?`,
-      vals
-    );
-
-    // return the updated employee
-    const rows = await dbAll(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
-    );
-
-    const employee = rows[0];
-    if (!employee) return res.status(404).json({ error: "Employee not found" });
-
-    return res.json({
-      employee: {
-        ...employee,
-        verify_url: verifyUrlFor(employee.employee_id),
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Failed to update employee" });
-  }
-});
-
-app.put("/api/employees/:id", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const p = req.body || {};
-  const exists = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!exists) return res.status(404).json({ error: "Not found" });
-
-  await dbRun(`
-    UPDATE employees SET
-      full_name = COALESCE(?, full_name),
-      job_title = COALESCE(?, job_title),
-      department = COALESCE(?, department),
-      employment_type = COALESCE(?, employment_type),
-      hire_date = COALESCE(?, hire_date),
-      status = COALESCE(?, status),
-      phone = COALESCE(?, phone),
-      email = COALESCE(?, email),
-      home_address = COALESCE(?, home_address),
-      dob = COALESCE(?, dob),
-      emergency_contact_name = COALESCE(?, emergency_contact_name),
-      emergency_contact_phone = COALESCE(?, emergency_contact_phone),
-      notes = COALESCE(?, notes),
-      updated_at = datetime('now')
-    WHERE employee_id = ?
-  `, [
-    p.full_name, p.job_title, p.department, p.employment_type, p.hire_date, p.status,
-    p.phone, p.email, p.home_address, p.dob, p.emergency_contact_name, p.emergency_contact_phone,
-    p.notes, id
-  ]);
-
-  const updated = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  sendWebhookIfConfigured({ event: "employee.updated", employee: updated }, process.env);
-
-  res.json({ ...updated, verify_url: verifyUrlFor(id) });
-});
-
-app.delete("/api/employees/:id", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
+await dbRun(
+  "UPDATE employees SET ${sets.join(', ')} WHERE employee_id = ?",
+ 
   const exists = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
   if (!exists) return res.status(404).json({ error: "Not found" });
 
@@ -373,79 +313,7 @@ app.delete("/api/employees/:id", async (req, res) => {
 app.put("/api/employees/:id/driver", async (req, res) => {
   const id = normalizeEmployeeId(req.params.id);
   const p = req.body || {};
-  const exists = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!exists) return res.status(404).json({ error: "Employee not found" });
 
-  await dbRun(`
-    INSERT INTO drivers (employee_id, license_number, license_state, license_expiry, medical_card_expiry,
-      drug_alcohol_status, assigned_vehicle, route_type, notes, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,datetime('now'))
-    ON CONFLICT(employee_id) DO UPDATE SET
-      license_number=excluded.license_number,
-      license_state=excluded.license_state,
-      license_expiry=excluded.license_expiry,
-      medical_card_expiry=excluded.medical_card_expiry,
-      drug_alcohol_status=excluded.drug_alcohol_status,
-      assigned_vehicle=excluded.assigned_vehicle,
-      route_type=excluded.route_type,
-      notes=excluded.notes,
-      updated_at=datetime('now')
-  `, [
-    id,
-    p.license_number || "", p.license_state || "", p.license_expiry || "", p.medical_card_expiry || "",
-    p.drug_alcohol_status || "", p.assigned_vehicle || "", p.route_type || "", p.notes || ""
-  ]);
-
-  const driver = await dbGet("SELECT * FROM drivers WHERE employee_id = ?", [id]);
-  sendWebhookIfConfigured({ event: "employee.driver_updated", employee_id: id, driver }, process.env);
-
-  res.json(driver);
-});
-
-// Documents checklist
-app.put("/api/employees/:id/documents", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const p = req.body || {};
-  const exists = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!exists) return res.status(404).json({ error: "Employee not found" });
-
-  await dbRun(`
-    INSERT INTO documents (
-      employee_id, employment_agreement, w4, i9, government_id_copy, driver_license_copy,
-      medical_card, nda, insurance_ack, background_check, notes, updated_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,datetime('now'))
-    ON CONFLICT(employee_id) DO UPDATE SET
-      employment_agreement=excluded.employment_agreement,
-      w4=excluded.w4,
-      i9=excluded.i9,
-      government_id_copy=excluded.government_id_copy,
-      driver_license_copy=excluded.driver_license_copy,
-      medical_card=excluded.medical_card,
-      nda=excluded.nda,
-      insurance_ack=excluded.insurance_ack,
-      background_check=excluded.background_check,
-      notes=excluded.notes,
-      updated_at=datetime('now')
-  `, [
-    id,
-    p.employment_agreement || "", p.w4 || "", p.i9 || "", p.government_id_copy || "", p.driver_license_copy || "",
-    p.medical_card || "", p.nda || "", p.insurance_ack || "", p.background_check || "", p.notes || ""
-  ]);
-
-  const docs = await dbGet("SELECT * FROM documents WHERE employee_id = ?", [id]);
-  sendWebhookIfConfigured({ event: "employee.documents_updated", employee_id: id, documents: docs }, process.env);
-
-  res.json(docs);
-});
-
-// QR image
-app.get("/api/employees/:id/qrcode.png", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const e = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!e) return res.status(404).send("Not found");
-
-  const url = verifyUrlFor(id);
-  res.type("png");
   QRCode.toFileStream(res, url, { margin: 1, scale: 6 });
 });
 
