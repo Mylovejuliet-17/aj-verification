@@ -92,24 +92,19 @@ app.post("/api/employees", async (req, res) => {
 }
 });
 
+ // 👉 PASTE STEP 2 HERE
+ app.get("/api/employees/:id", async (req, res) => {
+   try {
+    const id = normalizeEmployeeId(req.params.id);
+   const rows = await dbAll(
+     "SELECT * FROM employees WHERE employee_id = ?",
+     [id]
+   );
+   const employee = rows[0];
 
-
-
-94 
-95 // 👉 PASTE STEP 2 HERE
-96 app.get("/api/employees/:id", async (req, res) => {
-97   try {
-98     const id = normalizeEmployeeId(req.params.id);
-99
-100    const rows = await dbAll(
-101      "SELECT * FROM employees WHERE employee_id = ?",
-102      [id]
-103    );
-104    const employee = rows[0];
-105
-106    if (!employee) {
-107      return res.status(404).json({ error: "Employee not found" });
-108    }
+  if (!employee) {
+     return res.status(404).json({ error: "Employee not found" });
+  }
     return res.json({
       employee: {
         ...employee,
@@ -122,17 +117,17 @@ app.post("/api/employees", async (req, res) => {
   }
 });
 
-110    return res.json({
-111      employee: {
-112        ...employee,
-113        verify_url: verifyUrlFor(employee.employee_id)
-114      }
-115    });
-116  } catch (err) {
-117    console.error(err);
-118    return res.status(500).json({ error: "Failed to fetch employee" });
-119  }
-120 });
+   return res.json({
+    employee: {
+      ...employee,
+     verify_url: verifyUrlFor(employee.employee_id)
+    }
+   });
+ } catch (err) {
+   console.error(err);
+  return res.status(500).json({ error: "Failed to fetch employee" });
+ }
+ });
 
 
 
