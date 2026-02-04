@@ -92,30 +92,96 @@ app.post("/api/employees", async (req, res) => {
 }
 });
 
- // 👉 PASTE STEP 2 HERE
- app.get("/api/employees/:id", async (req, res) => {
-   try {
-    const id = normalizeEmployeeId(req.params.id);
-   const rows = await dbAll(
-     "SELECT * FROM employees WHERE employee_id = ?",
-     [id]
-   );
-   const employee = rows[0];
+ // =========================
+// STEP 2: GET / UPDATE ROUTES
+// =========================
 
-  if (!employee) {
-     return res.status(404).json({ error: "Employee not found" });
-  }
+// Get employee by ID (SQLite)
+app.get("/api/employees/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
+
+    const rows = await dbAll(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+    const employee = rows[0];
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
     return res.json({
       employee: {
         ...employee,
-        verify_url: verifyUrlFor(employee.employee_id)
-      }
+        verify_url: verifyUrlFor(employee.employee_id),
+      },
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+
+// Update employee by ID (SQLite)
+app.put("/api/employees/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
+    const p = req.body || {};
+
+    // Build update fields safely
+    const fields = [];
+    const values = [];
+
+    const allowed = [
+      "full_name",
+      "department",
+      "position",
+      "company",
+      "photo_url",
+      "status",
+    ];
+
+    for (const key of allowed) {
+      if (p[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(p[key]);
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    values.push(id);
+
+    await dbRun(
+      `UPDATE employees SET ${fields.join(", ")} WHERE employee_id = ?`,
+      values
+    );
+
+    const rows = await dbAll(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+    const employee = rows[0];
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    return res.json({
+      employee: {
+        ...employee,
+        verify_url: verifyUrlFor(employee.employee_id),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to update employee" });
+  }
+});
+
 
    // 👉 STEP 2: GET employee by ID (SQLite)
 app.get("/api/employees/:id", async (req, res) => {
