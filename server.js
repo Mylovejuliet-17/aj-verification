@@ -232,17 +232,38 @@ app.get("/api/employees/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    app.get("/api/employees/:id", async (req, res) => {
+    // 👉 GET employee by ID (SQLite)
+app.get("/api/employees/:id", async (req, res) => {
   try {
-    ...
+    const id = normalizeEmployeeId(req.params.id);
+
+    const rows = await dbAll(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+
+    const employee = rows[0];
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    return res.json({
+      employee: {
+        ...employee,
+        verify_url: verifyUrlFor(employee.employee_id),
+      },
+    });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
 
 
 
-    const p = req.body || {};
+
+   
 
     // 👉 UPDATE employee by ID (SQLite)
 app.put("/api/employees/:id", async (req, res) => {
