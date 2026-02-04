@@ -219,18 +219,7 @@ app.get("/api/employees/:id", async (req, res) => {
  
     
 
-  
-  try {
-    const id = normalizeEmployeeId(req.params.id);
-
-    
-    return res.json({
-      employee: {
-        ...employee,
-        verify_url: verifyUrlFor(employee.employee_id)
-      }
-    });
-  // 👉 GET employee by ID (SQLite)
+  // GET employee by ID (single source of truth)
 app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
@@ -245,7 +234,7 @@ app.get("/api/employees/:id", async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    return res.json({
+    res.json({
       employee: {
         ...employee,
         verify_url: verifyUrlFor(employee.employee_id),
@@ -253,9 +242,12 @@ app.get("/api/employees/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Failed to fetch employee" });
+    res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+  // 👉 GET employee by ID (SQLite)
+app.get("/api/employees/:id", async (req, res) => {
+  // (duplicate GET /api/employees/:id rout removed)
 
 // Fallback
 app.use((err, req, res, next) => {
