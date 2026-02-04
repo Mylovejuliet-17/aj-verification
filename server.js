@@ -228,26 +228,24 @@ app.get("/api/employees/:id", async (req, res) => {
       "SELECT * FROM employees WHERE employee_id = ?",
       [id]
     );
+ const employee = rows[0];
+if (!employee) {
+ return res.status(404).json({ error: "Employee not found" });
+}
+res.json({
+  employee: {
+    ...employee,
+     verify_url: verifyUrlFor(employee.employee_id),
+  },
+ });
+ } catch (err) {
+  console.error(err);
+  res.status(500).json({ error: "Failed to fetch employee" });
+ }
+ });
 
-    const employee = rows[0];
-    if (!employee) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
 
-    res.json({
-      employee: {
-        ...employee,
-        verify_url: verifyUrlFor(employee.employee_id),
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch employee" });
-  }
-});
-  // 👉 GET employee by ID (SQLite)
-app.get("/api/employees/:id", async (req, res) => {
-  // (duplicate GET /api/employees/:id rout removed)
+ 
 
 // Fallback
 app.use((err, req, res, next) => {
