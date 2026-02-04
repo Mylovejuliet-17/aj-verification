@@ -258,61 +258,6 @@ app.get("/api/employees/:id", async (req, res) => {
 });
 
 
-    
-
-    
-  await dbRun("DELETE FROM employees WHERE employee_id = ?", [id]);
-  sendWebhookIfConfigured({ event: "employee.deleted", employee: exists }, process.env);
-
-  res.json({ ok: true });
-});
-
-// Driver addendum
-app.put("/api/employees/:id/driver", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const p = req.body || {};
-
-  QRCode.toFileStream(res, url, { margin: 1, scale: 6 });
-});
-
-// ID card PDF (single)
-app.get("/api/employees/:id/idcard.pdf", async (req, res) => {
-  const id = normalizeEmployeeId(req.params.id);
-  const e = await dbGet("SELECT * FROM employees WHERE employee_id = ?", [id]);
-  if (!e) return res.status(404).send("Not found");
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `inline; filename="${id}_idcard.pdf"`);
-
-  const doc = new PDFDocument({ size: [241, 151], margin: 10 }); // approx 3.35x2.1 inches @72dpi
-  doc.pipe(res);
-
-  // Header
-  doc.rect(0, 0, doc.page.width, 34).fill("#1F4E79");
-  doc.fillColor("white").font("Helvetica-Bold").fontSize(10).text("A&J ALPHA GLOBAL LOGISTICS LLC", 10, 12);
-
-  // Body text
-  doc.fillColor("#000000").font("Helvetica").fontSize(9);
-  doc.text(`Name: ${e.full_name}`, 10, 44);
-  doc.text(`Title: ${e.job_title || ""}`, 10, 62);
-  doc.text(`Employee ID: ${e.employee_id}`, 10, 80);
-  doc.text(`Status: ${e.status || ""}`, 10, 98);
-
-  // QR code
-  const url = verifyUrlFor(id);
-  const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, scale: 6 });
-  const img = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-  const buf = Buffer.from(img, "base64");
-  doc.image(buf, doc.page.width - 88, 46, { fit: [72, 72] });
-
-  doc.fillColor("#666666").fontSize(7).text("Scan to verify", 10, 126);
-  doc.end();
-});
-
-// ID cards PDF (multiple on letter)
-app.get("/api/idcards.pdf", async (req, res) => {
-  const idsParam = (req.query.ids || "").toString();
-  const ids = idsParam.split(",").map(normalizeEmployeeId).filter(Boolean);
   if (ids.length === 0) return res.status(400).send("Provide ids query param, e.g. ?ids=AJ-EMP-001,AJ-EMP-002");
 
   const employees = await dbAll(`SELECT * FROM employees WHERE employee_id IN (${ids.map(() => "?").join(",")}) ORDER BY employee_id`, ids);
@@ -358,16 +303,7 @@ app.get("/api/idcards.pdf", async (req, res) => {
     const url = verifyUrlFor(e.employee_id);
     const qrDataUrl = await QRCode.toDataURL(url, { margin: 1, scale: 6 });
     const img = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-    const buf = Buffer.from(img, "base64");
-    doc.image(buf, x + cardW - 88, y + 46, { fit: [72, 72] });
-
-    doc.fillColor("#666666").fontSize(7).text("Scan to verify", x+10, y+126);
-    doc.restore();
-
-    // position
-    col += 1;
-    if (col >= 2) {
-      col = 0;
+    
       x = startX;
       y += cardH + gapY;
     } else {
