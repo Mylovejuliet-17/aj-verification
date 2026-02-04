@@ -92,7 +92,9 @@ app.post("/api/employees", async (req, res) => {
 }
 });
 
-93 });
+
+
+
 94 
 95 // 👉 PASTE STEP 2 HERE
 96 app.get("/api/employees/:id", async (req, res) => {
@@ -108,7 +110,18 @@ app.post("/api/employees", async (req, res) => {
 106    if (!employee) {
 107      return res.status(404).json({ error: "Employee not found" });
 108    }
-109
+    return res.json({
+      employee: {
+        ...employee,
+        verify_url: verifyUrlFor(employee.employee_id)
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to fetch employee" });
+  }
+});
+
 110    return res.json({
 111      employee: {
 112        ...employee,
