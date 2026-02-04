@@ -172,28 +172,60 @@ app.get("/api/employees/:id", async (req, res) => {
 
     const p = req.body || {};
 
-    const updated = await Employee.findOneAndUpdate(
-      { employee_id: id },
-      {
-        $set: {
-          full_name: p.full_name,
-          position: p.job_title || p.position,
-          department: p.department,
-          employment_type: p.employment_type,
-          status: p.status,
-          company: p.company
-        }
-      },
-      { new: true }
-  
+    // 👉 UPDATE employee by ID (SQLite)
+app.put("/api/employees/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
+    const p = req.body || {};
 
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    return res.json(updated);
+    // Only allow updating these fields
+    const allowed = ["full_name", "department", "position", "company", "photo_url", "status"];
+    const sets = [];
+    const vals = [];
+
+    for (const key of allowed) {
+      if (p[key] !== undefined) {
+        sets.push(`${key} = ?`);
+        vals.push(p[key]);
+      }
+    }
+
+    if (sets.length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    // Add updated time if you have this column (safe to remove if you don't)
+    // sets.push("updated_at = ?");
+    // vals.push(nowIso());
+
+    vals.push(id);
+
+    await dbRun(
+      `UPDATE employees SET ${sets.join(", ")} WHERE employee_id = ?`,
+      vals
+    );
+
+    // return the updated employee
+    const rows = await dbAll(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+
+    const employee = rows[0];
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
+
+    return res.json({
+      employee: {
+        ...employee,
+        verify_url: verifyUrlFor(employee.employee_id),
+      },
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Failed to update employee" });
   }
 });
+
 app.put("/api/employees/:id", async (req, res) => {
   const id = normalizeEmployeeId(req.params.id);
   const p = req.body || {};
