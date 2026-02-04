@@ -230,9 +230,7 @@ app.get("/api/employees/:id", async (req, res) => {
         verify_url: verifyUrlFor(employee.employee_id)
       }
     });
-  } catch (err) {
-    console.error(err);
-    // 👉 GET employee by ID (SQLite)
+  // 👉 GET employee by ID (SQLite)
 app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
@@ -243,7 +241,6 @@ app.get("/api/employees/:id", async (req, res) => {
     );
 
     const employee = rows[0];
-
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
     }
@@ -259,6 +256,8 @@ app.get("/api/employees/:id", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+
+
 
 
 
