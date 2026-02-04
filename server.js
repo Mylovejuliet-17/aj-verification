@@ -90,6 +90,8 @@ app.post("/api/employees", async (req, res) => {
   console.error(err);
   res.status(500).json({ error: "Failed to create employee" });
 }
+});
+
 93 });
 94 
 95 // 👉 PASTE STEP 2 HERE
