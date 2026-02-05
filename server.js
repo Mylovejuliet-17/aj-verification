@@ -70,11 +70,10 @@ app.get("/verify/:id", async (req, res) => {
 
     const id = normalizeEmployeeId(req.params.id);
 
-    const rows = await sqlAll("SELECT * FROM employees");
+    const employee = await sqlGet(
   "SELECT * FROM employees WHERE employee_id = ?",
   [id]
 );
-
     if (!employee) {
       return res.status(404).send("Employee not found");
     }
