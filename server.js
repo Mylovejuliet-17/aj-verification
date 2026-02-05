@@ -183,7 +183,7 @@ app.get("/api/employees/:id", async (req, res) => {
 // ============================
 app.get("/api/debug/employees", async (req, res) => {
   try {
-    const rows = await sqlAll"SELECT * FROM employees");
+    const rows = await sqlAll("SELECT * FROM employees");
     return res.json(rows);
   } catch (err) {
     console.error(err);
