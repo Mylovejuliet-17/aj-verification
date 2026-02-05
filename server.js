@@ -3,37 +3,9 @@
  const cors = require("cors");
 
  const db = require("./db");
-
-// ---- INIT DATABASE TABLE ----
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS employees (
-    employee_id TEXT PRIMARY KEY,
-    full_name TEXT NOT NULL,
-    position TEXT,
-    department TEXT,
-    company TEXT,
-    photo_url TEXT,
-    status TEXT,
-    created_at TEXT
-  )
-`, (err) => {
-  if (err) {
-    console.error("DB init error:", err);
-  } else {
-    console.log("Employees table ready");
-  }
-});
+const { dbAll, dbGet, dbRun } = db;
 
 
-
-
-
-// --- TEMP seed employee (so /verify works) ---
-
-
-
-// const webhook = require('./services/webhook');
 
 
 const app = express();
