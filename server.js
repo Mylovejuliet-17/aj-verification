@@ -3,7 +3,8 @@
  const cors = require("cors");
 
  const db = require("./db");
- const { dbAll, dbRun } = db;
+const { dbAll, dbGet, dbRun } = db;
+
 
 
 // --- TEMP seed employee (so /verify works) ---
@@ -54,9 +55,11 @@ app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
 
-    const rows = await dbAll(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
+    const employee = await dbGet(
+  "SELECT * FROM employees WHERE employee_id = ?",
+  [id]
+);
+
     );
     const employee = rows[0];
 
