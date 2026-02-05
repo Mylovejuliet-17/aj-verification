@@ -4,6 +4,19 @@
 
  const db = require("./db");
 const { dbAll, dbGet, dbRun } = db;
+// ---- INIT DATABASE TABLE ----
+db.run(`
+CREATE TABLE IF NOT EXISTS employees (
+  employee_id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  position TEXT,
+  department TEXT,
+  company TEXT,
+  photo_url TEXT,
+  status TEXT,
+  created_at TEXT
+)
+`);
 
 
 
@@ -40,6 +53,34 @@ function nowIso() {
 
 // ---- API ----
 app.get("/api/health", (req, res) => res.json({ ok: true }));
+app.get("/verify/:id", async (req, res) => {
+  try {
+    const id = normalizeEmployeeId(req.params.id);
+
+    const employee = await dbGet(
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
+
+    if (!employee) {
+      return res.status(404).send("Employee not found");
+    }
+
+    res.send(`
+      <h2>Employment Verified ✅</h2>
+      <p><b>ID:</b> ${employee.employee_id}</p>
+      <p><b>Name:</b> ${employee.full_name}</p>
+      <p><b>Position:</b> ${employee.position || ""}</p>
+      <p><b>Department:</b> ${employee.department || ""}</p>
+      <p><b>Company:</b> ${employee.company || ""}</p>
+      <p><b>Status:</b> ${employee.status || ""}</p>
+    `);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 
 // ================================
  // CREATE EMPLOYEE (ADD HERE)
