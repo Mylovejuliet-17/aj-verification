@@ -305,7 +305,3 @@ app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
-
-
-
-
