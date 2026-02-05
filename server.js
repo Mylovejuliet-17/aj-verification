@@ -72,12 +72,31 @@ app.get("/api/employees/:id", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+app.get("/api/debug/tables", async (req, res) => {
+  try {
+    const rows = await dbAll(
+      "SELECT name FROM sqlite_master WHERE type='table'"
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+ app.get("/api/debug/employees", async (req, res) => {
+  try {
+    const rows = await dbAll("SELECT * FROM employees");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Update employee by ID (SQLite)
 app.put("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
-    const p = req.body || {};
+    
 
     // Build update fields safely
     const fields = [];
