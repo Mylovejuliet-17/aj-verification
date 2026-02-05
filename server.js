@@ -87,7 +87,7 @@ app.get("/verify/:id", async (req, res) => {
        photo_url,
        status = "active"
      } = req.body;
- 
+ try {
      if (!employee_id || !full_name) {
        return res.status(400).json({ error: "employee_id and full_name required" });
      }
@@ -108,6 +108,15 @@ await dbRun(
     nowIso(),
   ]
 );
+return res.status(201).json({
+  employee_id: id,
+  verify_url: verifyUrlFor(id),
+});
+} catch (err) {
+  console.error(err);
+  return res.status(500).json({ error: err.message });
+}
+});
 
 
 
