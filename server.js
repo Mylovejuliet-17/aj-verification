@@ -19,6 +19,7 @@ function dbRun(sql, params = []) {
 
 
 const app = express();
+app.use(express.json()):
 app.use(helmet({ contentSecurityPolicy: false })); // allow inline admin UI for simplicity
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
