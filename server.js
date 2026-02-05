@@ -43,7 +43,6 @@ function nowIso() {
 
 // ---- API ----
 app.get("/api/health", (req, res) => res.json({ ok: true }));
-
  // =========================
 // STEP 2: GET / UPDATE ROUTES
 // =========================
@@ -57,9 +56,6 @@ app.get("/api/employees/:id", async (req, res) => {
   "SELECT * FROM employees WHERE employee_id = ?",
   [id]
 );
-
-    );
-    const employee = rows[0];
 
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
