@@ -84,43 +84,24 @@ app.get("/verify/:id", async (req, res) => {
  
     const id = normalizeEmployeeId(employee_id);
 
-     await dbRun(
-       `INSERT INTO employees 
-       (employee_id, full_name, position, department, company, photo_url, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, full_name, position || "", department || "", company || "", photo_url || "", status, nowIso()]
-     );
+    await dbRun(
+  `INSERT OR REPLACE INTO employees
+   (employee_id, full_name, position, department, company, photo_url, status, created_at)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  [
+    id,
+    full_name,
+    position || "",
+    department || "",
+    company || "",
+    photo_url || "",
+    status,
+    nowIso()
+  ]
+);
 
-     return res.status(201).json({
-       employee_id: id,
-       verify_url: verifyUrlFor(id)
-     });
-   } catch (err) {
-     console.error(err);
-    return res.status(500).json({ error: "Failed to create employee" });
-   }
- });
 
-    
 
-app.get("/api/debug/tables", async (req, res) => {
-  try {
-    const rows = await dbAll(
-      "SELECT name FROM sqlite_master WHERE type='table'"
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
- app.get("/api/debug/employees", async (req, res) => {
-  try {
-    const rows = await dbAll("SELECT * FROM employees");
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 // Update employee by ID (SQLite)
