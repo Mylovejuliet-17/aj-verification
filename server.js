@@ -278,19 +278,22 @@ res.json({
  
 
 
-  app.get("/api/debug/employees", async (req, res) => {
+  // =============================
+// DEBUG: LIST ALL EMPLOYEES
+// =============================
+app.get("/api/debug/employees", async (req, res) => {
   try {
     const rows = await dbAll("SELECT * FROM employees");
-    res.json(rows);
+    return res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
-  // =========================
-// Fallback (error handler)
-// =========================
-
+// =============================
+// FALLBACK (ERROR HANDLER)
+// =============================
 app.use((err, req, res, next) => {
   console.error(err);
   return res.status(500).json({
@@ -299,8 +302,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ============================
+// =============================
 // START SERVER (ONLY ONCE)
+// =============================
 app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
