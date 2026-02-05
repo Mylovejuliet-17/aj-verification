@@ -33,29 +33,12 @@ function verifyUrlFor(id) {
   id = normalizeEmployeeId(id);
   return `${BASE_VERIFY_URL}/${encodeURIComponent(id)}`;
 }
-
 function nowIso() {
   return new Date().toISOString();
 }
 
-function dbAll(sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows));
-  });
-}
-function dbGet(sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => err ? reject(err) : resolve(row));
-  });
-}
-function dbRun(sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) return reject(err);
-      resolve({ changes: this.changes, lastID: this.lastID });
-    });
-  });
-}
+
+
 
 function safePublicEmployeeView(e) {
   if (!e) return null;
