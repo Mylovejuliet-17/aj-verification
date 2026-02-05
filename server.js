@@ -37,6 +37,27 @@ function verifyUrlFor(id) {
 function nowIso() {
   return new Date().toISOString();
 }
+// ---- DB Helpers (SQLite) ----
+function dbAll(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => (err ? reject(err) : resolve(rows)));
+  });
+}
+
+function dbGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => (err ? reject(err) : resolve(row)));
+  });
+}
+
+function dbRun(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function (err) {
+      if (err) return reject(err);
+      resolve(this);
+    });
+  });
+}
 
 
 
@@ -81,35 +102,8 @@ app.get("/api/health", (req, res) => res.json({ ok: true }));
     return res.status(500).json({ error: "Failed to create employee" });
    }
  });
-// =========================
-// STEP 2: GET / UPDATE ROUTES
-// =========================
 
-// Get employee by ID (SQLite)
-app.get("/api/employees/:id", async (req, res) => {
-  try {
-    const id = normalizeEmployeeId(req.params.id);
-
-    const employee = await dbGet(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
-    );
-
-    if (!employee) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
-
-    return res.json({
-      employee: {
-        ...employee,
-        verify_url: verifyUrlFor(employee.employee_id),
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Failed to fetch employee" });
-  }
-});
+    
 
 app.get("/api/debug/tables", async (req, res) => {
   try {
