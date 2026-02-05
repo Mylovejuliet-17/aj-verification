@@ -5,18 +5,19 @@
  const db = require("./db");
 const { dbAll, dbGet, dbRun } = db;
 // ---- INIT DATABASE TABLE ----
-db.run(`
-CREATE TABLE IF NOT EXISTS employees (
-  employee_id TEXT PRIMARY KEY,
-  full_name TEXT NOT NULL,
-  position TEXT,
-  department TEXT,
-  company TEXT,
-  photo_url TEXT,
-  status TEXT,
-  created_at TEXT
-)
-`);
+dbRun(`
+  CREATE TABLE IF NOT EXISTS employees (
+    employee_id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    position TEXT,
+    department TEXT,
+    company TEXT,
+    photo_url TEXT,
+    status TEXT,
+    created_at TEXT
+  )
+`).catch(console.error);
+
 
 
 
