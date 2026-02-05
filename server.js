@@ -42,15 +42,6 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function dbGet(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) return reject(err);
-      resolve(row);
-    });
-  });
-}
-
 
 function dbAll(sql, params = []) {
   return new Promise((resolve, reject) => {
