@@ -23,7 +23,7 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
-const BASE_VERIFY_URL = (process.env.BASE_VERIFY_URL || "https://YOUR-DOMAIN/verify").replace(/\/+$/, "");
+const BASE_VERIFY_URL = (process.env.BASE_VERIFY_URL || "https://YfOUR-DOMAIN/verify").replace(/\/+$/, "");
 
 // ---- Helpers ----
 function normalizeEmployeeId(id) {
@@ -81,14 +81,6 @@ app.get("/api/health", (req, res) => res.json({ ok: true }));
     return res.status(500).json({ error: "Failed to create employee" });
    }
  });
-
- // =========================
- // STEP 2: GET / UPDATE ROUTES
- // =========================
-
- // Get employee by ID (SQLite)
- app.get("/api/employees/:id", async (req, res) => {
- 
 // =========================
 // STEP 2: GET / UPDATE ROUTES
 // =========================
@@ -99,9 +91,9 @@ app.get("/api/employees/:id", async (req, res) => {
     const id = normalizeEmployeeId(req.params.id);
 
     const employee = await dbGet(
-  "SELECT * FROM employees WHERE employee_id = ?",
-  [id]
-);
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
 
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
@@ -118,6 +110,7 @@ app.get("/api/employees/:id", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+
 app.get("/api/debug/tables", async (req, res) => {
   try {
     const rows = await dbAll(
