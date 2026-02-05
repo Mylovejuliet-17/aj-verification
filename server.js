@@ -1,6 +1,10 @@
-const express = require("express");
-const helmet = require("helmet");
-const cors = require("cors");
+ const express = require("express");
+ const helmet = require("helmet");
+ const cors = require("cors");
+
+ const db = require("./db");
+ const { dbAll, dbRun } = db;
+
 
 // --- TEMP seed employee (so /verify works) ---
 
