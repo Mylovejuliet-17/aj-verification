@@ -51,6 +51,14 @@ function dbGet(sql, params = []) {
   });
 }
 // 👆👆 END dbGet 👆👆
+function dbAll(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) return reject(err);
+      resolve(rows);
+    });
+  });
+}
 
 // ==== API ====
 app.get("/api/health", (req, res) => res.json({ ok: true }));
@@ -175,31 +183,7 @@ app.get("/api/employees/:id", async (req, res) => {
     
 
 
-  // GET employee by ID (single source of truth)
-app.get("/api/employees/:id", async (req, res) => {
-  try {
-    const id = normalizeEmployeeId(req.params.id);
-
-        const employee = await dbGet(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
-    );
-
-if (!employee) {
- return res.status(404).json({ error: "Employee not found" });
-}
-res.json({
-  employee: {
-    ...employee,
-     verify_url: verifyUrlFor(employee.employee_id),
-  },
- });
- } catch (err) {
-  console.error(err);
-  res.status(500).json({ error: "Failed to fetch employee" });
- }
- });
-
+ 
 
  
 
