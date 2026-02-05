@@ -87,22 +87,8 @@ app.get("/verify/:id", async (req, res) => {
        photo_url,
        status = "active"
      } = req.body;
- app.post("/api/employees", async (req, res) => {
-  try {
-    const {
-      employee_id,
-      full_name,
-      position,
-      department,
-      company,
-      photo_url,
-      status = "active"
-    } = req.body;
-try {
-    if (!employee_id || !full_name) {
-      return res.status(400).json({ error: "employee_id and full_name required" });
-    }
 
+  
     app.post("/api/employees", async (req, res) => {
   try {
     const {
