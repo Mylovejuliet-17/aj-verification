@@ -218,6 +218,18 @@ app.get("/api/employees/:id", async (req, res) => {
 
  
     
+// ✅ LIST all employees
+app.get("/api/employees", async (req, res) => {
+  try {
+    const rows = await dbAll(
+      "SELECT * FROM employees ORDER BY employee_id ASC"
+    );
+    return res.json({ employees: rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to list employees" });
+  }
+});
 
   // GET employee by ID (single source of truth)
 app.get("/api/employees/:id", async (req, res) => {
