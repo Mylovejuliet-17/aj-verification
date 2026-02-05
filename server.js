@@ -40,44 +40,10 @@ function nowIso() {
 
 
 
-function safePublicEmployeeView(e) {
-  if (!e) return null;
-  return {
-    employee_id: e.employee_id,
-    full_name: e.full_name,
-    job_title: e.job_title,
-    status: e.status,
-    verified_at: nowIso()
-  };
-}
-
 // ---- API ----
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-app.post("/api/employees", async (req, res) => {
-  try {
-    const data = req.body;
 
-    // Auto-generate ID if not provided
-    if (!data.employee_id) {
-      data.employee_id = await generateEmployeeId(
-        data.position || data.department || "EMP"
-      );
-    }
-
-    const employee = await Employee.create(data);
-
-    res.status(201).json({
-  employee_id: employee.employee_id,
-  verify_url: verifyUrlFor(employee.employee_id),
-  employee
-});
-
-} catch (err) {
-  console.error(err);
-  res.status(500).json({ error: "Failed to create employee" });
-}
-});
 
  // =========================
 // STEP 2: GET / UPDATE ROUTES
