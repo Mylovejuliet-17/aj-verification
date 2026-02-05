@@ -226,9 +226,13 @@ app.get("/api/employees", async (req, res) => {
     );
     return res.json({ employees: rows });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Failed to list employees" });
-  }
+  console.error(err);
+  return res.status(500).json({
+    error: "Failed to list employees",
+    detail: err.message || String(err)
+  });
+}
+
 });
 
   // GET employee by ID (single source of truth)
