@@ -97,20 +97,18 @@ await dbRun(
   `INSERT OR REPLACE INTO employees
    (employee_id, full_name, position, department, company, photo_url, status, created_at)
    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-
   [
     id,
     full_name,
-    
     position || "",
-
     department || "",
     company || "",
     photo_url || "",
     status,
-    nowIso()
+    nowIso(),
   ]
 );
+
 
 
     
