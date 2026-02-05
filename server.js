@@ -3,7 +3,7 @@
  const cors = require("cors");
 
  const db = require("./db");
-const { dbAll, dbGet } = db;
+
 // Promise wrapper for sqlite db.run
 function dbRun(sql, params = []) {
   return new Promise((resolve, reject) => {
