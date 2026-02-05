@@ -42,10 +42,23 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-// ---- API ----
+function dbGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
+// 👆👆 END dbGet 👆👆
+
+// ==== API ====
 app.get("/api/health", (req, res) => res.json({ ok: true }));
+
+// ---- API ----
 app.get("/verify/:id", async (req, res) => {
   try {
+
     const id = normalizeEmployeeId(req.params.id);
 
     const employee = await dbGet(
@@ -132,12 +145,10 @@ app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
 
-    const rows = await dbAll(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
-    );
-
-    const employee = rows[0];
+    const employee = await dbGet(
+  "SELECT * FROM employees WHERE employee_id = ?",
+  [id]
+);
 
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
@@ -162,33 +173,18 @@ app.get("/api/employees/:id", async (req, res) => {
 
  
     
-// ✅ LIST all employees
-app.get("/api/employees", async (req, res) => {
-  try {
-    const rows = await dbAll(
-      "SELECT * FROM employees ORDER BY employee_id ASC"
-    );
-    return res.json({ employees: rows });
-  } catch (err) {
-  console.error(err);
-  return res.status(500).json({
-    error: "Failed to list employees",
-    detail: err.message || String(err)
-  });
-}
 
-});
 
   // GET employee by ID (single source of truth)
 app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
 
-    const rows = await dbAll(
+        const employee = await dbGet(
       "SELECT * FROM employees WHERE employee_id = ?",
       [id]
     );
- const employee = rows[0];
+
 if (!employee) {
  return res.status(404).json({ error: "Employee not found" });
 }
