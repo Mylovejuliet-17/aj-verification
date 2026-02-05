@@ -43,7 +43,53 @@ function nowIso() {
 
 // ---- API ----
 app.get("/api/health", (req, res) => res.json({ ok: true }));
+
+// ================================
+ // CREATE EMPLOYEE (ADD HERE)
+ // ================================
+ app.post("/api/employees", async (req, res) => {
+   try {
+     const {
+       employee_id,
+       full_name,
+       position,
+       department,
+       company,
+       photo_url,
+       status = "active"
+     } = req.body;
+ 
+     if (!employee_id || !full_name) {
+       return res.status(400).json({ error: "employee_id and full_name required" });
+     }
+ 
+    const id = normalizeEmployeeId(employee_id);
+
+     await dbRun(
+       `INSERT INTO employees 
+       (employee_id, full_name, position, department, company, photo_url, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, full_name, position || "", department || "", company || "", photo_url || "", status, nowIso()]
+     );
+
+     return res.status(201).json({
+       employee_id: id,
+       verify_url: verifyUrlFor(id)
+     });
+   } catch (err) {
+     console.error(err);
+    return res.status(500).json({ error: "Failed to create employee" });
+   }
+ });
+
  // =========================
+ // STEP 2: GET / UPDATE ROUTES
+ // =========================
+
+ // Get employee by ID (SQLite)
+ app.get("/api/employees/:id", async (req, res) => {
+ 
+// =========================
 // STEP 2: GET / UPDATE ROUTES
 // =========================
 
