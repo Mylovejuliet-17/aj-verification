@@ -50,7 +50,8 @@ function dbGet(sql, params = []) {
     });
   });
 }
-// 👆👆 END dbGet 👆👆
+
+
 function dbAll(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (err, rows) => {
