@@ -197,7 +197,6 @@ app.put("/api/employees/:id", async (req, res) => {
   }
 });
 
-
    // 👉 STEP 2: GET employee by ID (SQLite)
 app.get("/api/employees/:id", async (req, res) => {
   try {
@@ -278,22 +277,35 @@ res.json({
 
  
 
-// =========================
+
+  app.get("/api/debug/employees", async (req, res) => {
+  try {
+    const rows = await dbAll("SELECT * FROM employees");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+  // =========================
 // Fallback (error handler)
 // =========================
+
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({
+  return res.status(500).json({
     error: "Server error",
     detail: String((err && err.message) || err),
   });
 });
 
-// =========================
+// ============================
 // START SERVER (ONLY ONCE)
-// =========================
 app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
+
+
+
 
