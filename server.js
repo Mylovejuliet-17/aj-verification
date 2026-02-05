@@ -77,19 +77,6 @@ app.get("/verify/:id", async (req, res) => {
  // CREATE EMPLOYEE (ADD HERE)
  // ================================
  app.post("/api/employees", async (req, res) => {
-   try {
-     const {
-       employee_id,
-       full_name,
-       position,
-       department,
-       company,
-       photo_url,
-       status = "active"
-     } = req.body;
-
-  
-    app.post("/api/employees", async (req, res) => {
   try {
     const {
       employee_id,
@@ -111,8 +98,8 @@ app.get("/verify/:id", async (req, res) => {
 
     await dbRun(
       `INSERT OR REPLACE INTO employees
-       (employee_id, full_name, position, department, company, photo_url, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (employee_id, full_name, position, department, company, photo_url, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         full_name,
@@ -129,12 +116,12 @@ app.get("/verify/:id", async (req, res) => {
       employee_id: id,
       verify_url: verifyUrlFor(id),
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });
   }
 });
+
 
 
 
