@@ -3,9 +3,10 @@
  const cors = require("cors");
 
  const db = require("./db");
-const { dbAll, dbGet, dbRun } = db;
+
 // ---- INIT DATABASE TABLE ----
-dbRun(`
+
+db.run(`
   CREATE TABLE IF NOT EXISTS employees (
     employee_id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
@@ -16,7 +17,14 @@ dbRun(`
     status TEXT,
     created_at TEXT
   )
-`).catch(console.error);
+`, (err) => {
+  if (err) {
+    console.error("DB init error:", err);
+  } else {
+    console.log("Employees table ready");
+  }
+});
+
 
 
 
