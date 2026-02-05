@@ -41,9 +41,16 @@ function verifyUrlFor(id) {
 function nowIso() {
   return new Date().toISOString();
 }
+function sqlGet(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) return reject(err);
+      resolve(row);
+    });
+  });
+}
 
-
-function dbAll(sql, params = []) {
+function sqlAll(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (err, rows) => {
       if (err) return reject(err);
@@ -51,6 +58,8 @@ function dbAll(sql, params = []) {
     });
   });
 }
+
+
 
 // ==== API ====
 app.get("/api/health", (req, res) => res.json({ ok: true }));
@@ -61,10 +70,10 @@ app.get("/verify/:id", async (req, res) => {
 
     const id = normalizeEmployeeId(req.params.id);
 
-    const employee = await dbGet(
-      "SELECT * FROM employees WHERE employee_id = ?",
-      [id]
-    );
+    const employee = await sqlGet(
+  "SELECT * FROM employees WHERE employee_id = ?",
+  [id]
+);
 
     if (!employee) {
       return res.status(404).send("Employee not found");
