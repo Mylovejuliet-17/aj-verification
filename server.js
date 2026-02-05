@@ -3,7 +3,17 @@
  const cors = require("cors");
 
  const db = require("./db");
-const { dbAll, dbGet, dbRun } = db;
+const { dbAll, dbGet } = db;
+// Promise wrapper for sqlite db.run
+function dbRun(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function (err) {
+      if (err) return reject(err);
+      resolve(this);
+    });
+  });
+}
+
 
 
 
