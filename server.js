@@ -278,11 +278,10 @@ res.json({
 
  
 
-// ==============================
+// =========================
 // Fallback (error handler)
-// ==============================
+// =========================
 app.use((err, req, res, next) => {
-
   console.error(err);
   res.status(500).json({
     error: "Server error",
@@ -290,10 +289,11 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ==============================
+// =========================
 // START SERVER (ONLY ONCE)
-// ==============================
+// =========================
 app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
+
