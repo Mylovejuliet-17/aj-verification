@@ -112,26 +112,20 @@ app.get("/verify/:id", async (req, res) => {
     if (!employee_id || !full_name) {
       return res.status(400).json({ error: "employee_id and full_name required" });
     }
+await dbRun(
+  `INSERT INTO employees
+   (employee_id, full_name, position, department, company, status)
+   VALUES (?, ?, ?, ?, ?, ?)`,
+  [employee_id, full_name, position, department, company, status]
+);
 
-    await new Promise((resolve, reject) => {
-      db.run(
-        `INSERT INTO employees 
-        (employee_id, full_name, position, department, company, status)
-        VALUES (?, ?, ?, ?, ?, ?)`,
-        [employee_id, full_name, position, department, company, status],
-        function (err) {
-          if (err) return reject(err);
-          resolve();
-        }
-      );
-    });
+return res.status(201).json({
+  ok: true,
+  employee_id,
+  verify_url: verifyUrlFor(employee_id),
+});
 
-    res.json({ ok: true, employee_id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to add employee" });
-  }
-    
+
 });
 
 
