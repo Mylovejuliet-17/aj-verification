@@ -179,6 +179,7 @@ app.get("/api/employees/:id", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch employee" });
   }
 });
+}):
 
 
 
