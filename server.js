@@ -98,7 +98,10 @@ app.get("/verify/:id", async (req, res) => {
 // ================================
  // CREATE EMPLOYEE (ADD HERE)
  // ================================
- app.post("/api/employees", async (req, res) => {
+ // ===============================
+// CREATE EMPLOYEE
+// ===============================
+app.post("/api/employees", async (req, res) => {
   try {
     const {
       employee_id,
@@ -110,23 +113,40 @@ app.get("/verify/:id", async (req, res) => {
     } = req.body;
 
     if (!employee_id || !full_name) {
-      return res.status(400).json({ error: "employee_id and full_name required" });
+      return res.status(400).json({
+        error: "employee_id and full_name required"
+      });
     }
-await dbRun(
-  `INSERT INTO employees
-   (employee_id, full_name, position, department, company, status)
-   VALUES (?, ?, ?, ?, ?, ?)`,
-  [employee_id, full_name, position, department, company, status]
-);
 
-return res.status(201).json({
-  ok: true,
-  employee_id,
-  verify_url: verifyUrlFor(employee_id),
+    const normalizedId = normalizeEmployeeId(employee_id);
+
+    await dbRun(
+      `INSERT INTO employees 
+       (employee_id, full_name, position, department, company, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        normalizedId,
+        full_name,
+        position || "",
+        department || "",
+        company || "",
+        status || "Active"
+      ]
+    );
+    return res.status(201).json({
+      ok: true,
+      employee_id: normalizedId,
+      verify_url: verifyUrlFor(normalizedId)
+    });
+
+  } catch (err) {
+    console.error("CREATE EMPLOYEE ERROR:", err);
+    return res.status(500).json({
+      error: "Failed to add employee"
+    });
+  }
 });
 
-
-});
 
 
 
