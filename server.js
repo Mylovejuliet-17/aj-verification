@@ -1,10 +1,28 @@
- const express = require("express");
- const helmet = require("helmet");
- const cors = require("cors");
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const sqlite3 = require("sqlite3").verbose();
 
- const db = require("./db");
+const app = express();
 
-// Promise wrapper for sqlite db.run
+app.use(cors());
+app.use(express.json());
+
+// =========================
+// CONFIG
+// =========================
+const PORT = process.env.PORT || 3000;
+
+// IMPORTANT: put your real Render URL here if you want:
+const BASE_VERIFY_URL =
+  process.env.BASE_VERIFY_URL || "https://aj-verification-d4rh.onrender.com";
+
+// =========================
+// SQLITE SETUP
+// =========================
+const DB_PATH = path.join(__dirname, "data.sqlite");
+const db = new sqlite3.Database(DB_PATH);
+
 function dbRun(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -14,34 +32,6 @@ function dbRun(sql, params = []) {
   });
 }
 
-
-
-
-
-const app = express();
-app.use(express.json());
-app.use(helmet({ contentSecurityPolicy: false })); // allow inline admin UI for simplicity
-app.use(cors());
-app.use(express.json({ limit: "2mb" }));
-// app.use('/webhook', webhook);
-
-app.use(express.static("public"));
-
-const PORT = process.env.PORT || 3000;
-const BASE_VERIFY_URL = (process.env.BASE_VERIFY_URL || "https://YfOUR-DOMAIN/verify").replace(/\/+$/, "");
-
-// ---- Helpers ----
-function normalizeEmployeeId(id) {
-  return String(id || "").trim().toUpperCase();
-}
-
-function verifyUrlFor(id) {
-  id = normalizeEmployeeId(id);
-  return `${BASE_VERIFY_URL}/${encodeURIComponent(id)}`;
-}
-function nowIso() {
-  return new Date().toISOString();
-}
 function sqlGet(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.get(sql, params, (err, row) => {
@@ -60,101 +50,82 @@ function sqlAll(sql, params = []) {
   });
 }
 
+function normalizeEmployeeId(id) {
+  return String(id || "").trim().toUpperCase();
+}
 
+function verifyUrlFor(employeeId) {
+  return `${BASE_VERIFY_URL}/verify/${encodeURIComponent(employeeId)}`;
+}
 
-// ==== API ====
-app.get("/api/health", (req, res) => res.json({ ok: true }));
+// Create table if not exists
+(async () => {
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS employees (
+      employee_id TEXT PRIMARY KEY,
+      full_name TEXT,
+      position TEXT,
+      department TEXT,
+      company TEXT,
+      status TEXT
+    )
+  `);
+})().catch((e) => console.error("DB INIT ERROR:", e));
 
-// ---- API ----
-app.get("/verify/:id", async (req, res) => {
-  try {
-
-    const id = normalizeEmployeeId(req.params.id);
-
-    const employee = await sqlGet(
-  "SELECT * FROM employees WHERE employee_id = ?",
-  [id]
-);
-    if (!employee) {
-      return res.status(404).send("Employee not found");
-    }
-
-    res.send(`
-      <h2>Employment Verified ✅</h2>
-      <p><b>ID:</b> ${employee.employee_id}</p>
-      <p><b>Name:</b> ${employee.full_name}</p>
-      <p><b>Position:</b> ${employee.position || ""}</p>
-      <p><b>Department:</b> ${employee.department || ""}</p>
-      <p><b>Company:</b> ${employee.company || ""}</p>
-      <p><b>Status:</b> ${employee.status || ""}</p>
-    `);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
-  }
+// =========================
+// HEALTH CHECK
+// =========================
+app.get("/", (req, res) => {
+  res.json({ ok: true });
 });
 
-
-// ================================
- // CREATE EMPLOYEE (ADD HERE)
- // ================================
- // ===============================
-// CREATE EMPLOYEE
-// ===============================
+// =========================
+// STEP 1: CREATE EMPLOYEE
+// =========================
 app.post("/api/employees", async (req, res) => {
   try {
-    const {
-      employee_id,
-      full_name,
-      position,
-      department,
-      company,
-      status
-    } = req.body;
-
-    if (!employee_id || !full_name) {
-      return res.status(400).json({
-        error: "employee_id and full_name required"
-      });
-    }
+    const { employee_id, full_name, position, department, company, status } =
+      req.body || {};
 
     const normalizedId = normalizeEmployeeId(employee_id);
 
+    if (!normalizedId) {
+      return res.status(400).json({ error: "employee_id is required" });
+    }
+
     await dbRun(
-      `INSERT INTO employees 
-       (employee_id, full_name, position, department, company, status)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `
+      INSERT OR REPLACE INTO employees
+      (employee_id, full_name, position, department, company, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
       [
         normalizedId,
-        full_name,
+        full_name || "",
         position || "",
         department || "",
         company || "",
-        status || "Active"
+        status || "Active",
       ]
     );
+
     return res.status(201).json({
       ok: true,
       employee_id: normalizedId,
-      verify_url: verifyUrlFor(normalizedId)
+      verify_url: verifyUrlFor(normalizedId),
     });
-
   } catch (err) {
-  console.error("CREATE EMPLOYEE ERROR:", err);
-  return res.status(500).json({
-    error: "Failed to add employee",
-    detail: err.message
-  });
-}
+    console.error("CREATE EMPLOYEE ERROR:", err);
+    return res.status(500).json({
+      error: "Failed to add employee",
+      detail: err.message,
+    });
+  }
+});
 
-
-
-
-
-
-    
-
-   // 👉 STEP 2: GET employee by ID (SQLite)
+// =========================
+// STEP 2: GET EMPLOYEE BY ID
+// =========================
 app.get("/api/employees/:id", async (req, res) => {
   try {
     const id = normalizeEmployeeId(req.params.id);
@@ -175,7 +146,7 @@ app.get("/api/employees/:id", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("GET EMPLOYEE ERROR:", err);
     return res.status(500).json({
       error: "Failed to fetch employee",
       detail: err.message,
@@ -183,17 +154,6 @@ app.get("/api/employees/:id", async (req, res) => {
   }
 });
 
-
-
-
-
-  
-
- 
-    
-
-
- 
 // =========================
 // DEBUG: LIST ALL EMPLOYEES
 // =========================
@@ -202,16 +162,16 @@ app.get("/api/debug/employees", async (req, res) => {
     const rows = await sqlAll("SELECT * FROM employees");
     return res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("DEBUG LIST ERROR:", err);
     return res.status(500).json({ error: err.message });
   }
 });
 
 // =========================
-// FALLBACK (ERROR HANDLER)
+// FALLBACK ERROR HANDLER
 // =========================
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("UNHANDLED ERROR:", err);
   return res.status(500).json({
     error: "Server error",
     detail: String((err && err.message) || err),
@@ -221,9 +181,7 @@ app.use((err, req, res, next) => {
 // =========================
 // START SERVER (ONLY ONCE)
 // =========================
-const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log(`Employee registry server running on port ${PORT}`);
-  console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Verify base URL: ${BASE_VERIFY_URL}`);
 });
