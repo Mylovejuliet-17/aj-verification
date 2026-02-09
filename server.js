@@ -140,12 +140,13 @@ app.post("/api/employees", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("CREATE EMPLOYEE ERROR:", err);
-    return res.status(500).json({
-      error: "Failed to add employee"
-    });
-  }
-});
+  console.error("CREATE EMPLOYEE ERROR:", err);
+  return res.status(500).json({
+    error: "Failed to add employee",
+    detail: err.message
+  });
+}
+
 
 
 
