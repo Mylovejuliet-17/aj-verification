@@ -176,10 +176,13 @@ app.get("/api/employees/:id", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Failed to fetch employee" });
+    return res.status(500).json({
+      error: "Failed to fetch employee",
+      detail: err.message,
+    });
   }
 });
-}):
+
 
 
 
