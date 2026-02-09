@@ -194,9 +194,9 @@ app.get("/api/employees/:id", async (req, res) => {
 
 
  
-// ============================
+// =========================
 // DEBUG: LIST ALL EMPLOYEES
-// ============================
+// =========================
 app.get("/api/debug/employees", async (req, res) => {
   try {
     const rows = await sqlAll("SELECT * FROM employees");
@@ -207,9 +207,9 @@ app.get("/api/debug/employees", async (req, res) => {
   }
 });
 
-// ============================
+// =========================
 // FALLBACK (ERROR HANDLER)
-// ============================
+// =========================
 app.use((err, req, res, next) => {
   console.error(err);
   return res.status(500).json({
@@ -218,10 +218,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ============================
+// =========================
 // START SERVER (ONLY ONCE)
-// ============================
+// =========================
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`Employee registry server running on http://localhost:${PORT}`);
+  console.log(`Employee registry server running on port ${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
