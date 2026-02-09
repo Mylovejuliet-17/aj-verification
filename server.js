@@ -160,9 +160,9 @@ app.get("/api/employees/:id", async (req, res) => {
     const id = normalizeEmployeeId(req.params.id);
 
     const employee = await sqlGet(
-  "SELECT * FROM employees WHERE employee_id = ?",
-  [id]
-);
+      "SELECT * FROM employees WHERE employee_id = ?",
+      [id]
+    );
 
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
