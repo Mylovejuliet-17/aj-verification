@@ -194,11 +194,7 @@ app.get("/api/employees/:id", async (req, res) => {
 
 
  
-
- 
-
-  
-  // ============================
+// ============================
 // DEBUG: LIST ALL EMPLOYEES
 // ============================
 app.get("/api/debug/employees", async (req, res) => {
@@ -229,4 +225,3 @@ app.listen(PORT, () => {
   console.log(`Employee registry server running on http://localhost:${PORT}`);
   console.log(`Public verify base URL: ${BASE_VERIFY_URL}`);
 });
-// END OF FILE
